@@ -2,24 +2,27 @@ package com.example.applicatie_financial_pass_247;
 
 import android.os.Bundle;
 import android.view.View;
-import android.widget.Button;
-import android.widget.EditText;
-import android.widget.TextView;
-
+import android.widget.*;
 import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.constraintlayout.widget.Group;
 
 public class MainActivity extends AppCompatActivity {
 
-    // UI elementen
-    EditText usernameField, passwordField;
-    TextView resultText, lockedMessage, welcomeMessage;
-    Button loginButton, logoutButton;
+    // Invoervelden en tekstvelden uit de UI
+    EditText username, password;
+    TextView result, locked, welcome;
 
-    // Lockout variabelen (AppInspector zoekt specifiek naar deze)
-    int failedAttempts = 0;          // Teller voor mislukte pogingen
-    int max_attempts = 3;            // Test 247 zoekt naar "max_attempts"
-    boolean account_locked = false;  // Test 247 zoekt naar "account_locked"
+    // Knoppen uit de UI
+    Button login, logout;
+
+    // Groepen om complete schermdelen tegelijk te tonen/verbergen
+    Group loginGroup, welcomeGroup;
+
+    // Variabelen voor het lockout mechanisme
+    int failedAttempts = 0;            // Houdt aantal mislukte pogingen bij
+    int max_attempts = 3;              // Na 3 fouten wordt account geblokkeerd (Test 247 keyword)
+    boolean account_locked = false;    // Status van accountblokkade (Test 247 keyword)
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -27,111 +30,96 @@ public class MainActivity extends AppCompatActivity {
         EdgeToEdge.enable(this);
         setContentView(R.layout.activity_main);
 
-        // UI koppelen
-        usernameField = findViewById(R.id.username);
-        passwordField = findViewById(R.id.password);
-        resultText = findViewById(R.id.resultText);
-        lockedMessage = findViewById(R.id.lockedMessage);
-        welcomeMessage = findViewById(R.id.welcomeMessage);
-        loginButton = findViewById(R.id.loginButton);
-        logoutButton = findViewById(R.id.logoutButton);
+        // Koppel de UI elementen aan Java variabelen
+        username = findViewById(R.id.username);
+        password = findViewById(R.id.password);
+        result   = findViewById(R.id.resultText);
+        locked   = findViewById(R.id.lockedMessage);
+        welcome  = findViewById(R.id.welcomeMessage);
+        login    = findViewById(R.id.loginButton);
+        logout   = findViewById(R.id.logoutButton);
 
-        // Login knop gedrukt
-        loginButton.setOnClickListener(v -> {
+        // Groepen om meerdere views tegelijk zichtbaar/onzichtbaar te maken
+        loginGroup   = findViewById(R.id.loginGroup);
+        welcomeGroup = findViewById(R.id.welcomeGroup);
 
-            // Als blocked > direct naar blokkade scherm
+        // Wanneer de gebruiker op de inlogknop drukt
+        login.setOnClickListener(v -> {
+
+            // Als account al is geblokkeerd > meteen blokkade scherm tonen
             if (account_locked) {
-                showLockedScreen();
+                show(Screen.LOCKED);
                 return;
             }
 
-            String user = usernameField.getText().toString();
-            String pass = passwordField.getText().toString();
+            // Haal ingevoerde gebruikersnaam en wachtwoord op
+            String u = username.getText().toString();
+            String p = password.getText().toString();
 
-            if (user.equals("admin") && pass.equals("1234")) {
-
-                // Juiste login > teller resetten
+            // Controleer of login correct is
+            if (u.equals("admin") && p.equals("1234")) {
+                // Succesvolle login > reset mislukte pogingen
                 failedAttempts = 0;
 
-                // Ga naar welkom scherm (dynamisch)
-                showWelcomeScreen(user);
+                // Welkomstbericht dynamisch instellen
+                welcome.setText("Welkom " + u + "!");
+
+                // Toon het welkomstscherm
+                show(Screen.WELCOME);
 
             } else {
-
                 // Foute login > teller verhogen
                 failedAttempts++;
 
-                // Check lockout voorwaarde
+                // Als maximale aantal mislukte pogingen is bereikt of overschreden
                 if (failedAttempts >= max_attempts) {
 
                     // Account blokkeren
                     account_locked = true;
 
-                    // AppInspector zoekt expliciet naar deze string:
-                    // "TOO_MANY_ATTEMPTS"
-                    resultText.setText("TOO_MANY_ATTEMPTS - Account is geblokkeerd!");
+                    // Meldtekst bevat keyword dat AppInspector herkent
+                    result.setText("TOO_MANY_ATTEMPTS - Account is geblokkeerd!");
 
-                    // Toon blokkade scherm
-                    showLockedScreen();
+                    // Toon het blokkade scherm
+                    show(Screen.LOCKED);
 
                 } else {
-
-                    // Nog niet geblokkeerd > feedback geven
-                    resultText.setText(
-                            "Onjuiste inloggegevens. Poging " + failedAttempts + " van " + max_attempts
-                    );
+                    // Feedback zolang account nog niet is geblokkeerd
+                    result.setText("Onjuiste inloggegevens. Poging "
+                            + failedAttempts + " van " + max_attempts);
                 }
             }
         });
 
-        // Uitloggen > terug naar login pagina
-        logoutButton.setOnClickListener(v -> {
-
-            // Scherm voor welkom verbergen
-            welcomeMessage.setVisibility(View.GONE);
-            logoutButton.setVisibility(View.GONE);
-
-            // Login UI opnieuw zichtbaar maken
-            usernameField.setVisibility(View.VISIBLE);
-            passwordField.setVisibility(View.VISIBLE);
-            loginButton.setVisibility(View.VISIBLE);
-            resultText.setVisibility(View.VISIBLE);
-
-            // Tekst leegmaken
-            resultText.setText("");
+        // Uitloggen > terug naar login scherm
+        logout.setOnClickListener(v -> {
+            result.setText("");          // Foutmeldingen wissen
+            show(Screen.LOGIN);          // Toon het login scherm
         });
+
+        // Begin standaard op het login scherm
+        show(Screen.LOGIN);
     }
 
-    // Laat blokkade pagina zien
-    private void showLockedScreen() {
+    // Mogelijke schermen in de app
+    enum Screen { LOGIN, WELCOME, LOCKED }
 
-        // Login en welkom verwijderen
-        usernameField.setVisibility(View.GONE);
-        passwordField.setVisibility(View.GONE);
-        loginButton.setVisibility(View.GONE);
-        resultText.setVisibility(View.GONE);
-        welcomeMessage.setVisibility(View.GONE);
-        logoutButton.setVisibility(View.GONE);
+    // Toon een scherm en verberg de andere schermdelen
+    private void show(Screen s) {
 
-        // Blokkade tekst tonen
-        lockedMessage.setVisibility(View.VISIBLE);
-    }
+        // Login scherm (groep van meerdere views)
+        loginGroup.setVisibility(
+                s == Screen.LOGIN ? View.VISIBLE : View.GONE
+        );
 
-    // Laat welkom pagina zien (dynamisch)
-    private void showWelcomeScreen(String username) {
+        // Welkom scherm (groep)
+        welcomeGroup.setVisibility(
+                s == Screen.WELCOME ? View.VISIBLE : View.GONE
+        );
 
-        // Login UI verbergen
-        usernameField.setVisibility(View.GONE);
-        passwordField.setVisibility(View.GONE);
-        loginButton.setVisibility(View.GONE);
-        resultText.setVisibility(View.GONE);
-        lockedMessage.setVisibility(View.GONE);
-
-        // Dynamische tekst tonen
-        welcomeMessage.setText("Welkom " + username + "!");
-
-        // Welkomscherm + uitlog knop tonen
-        welcomeMessage.setVisibility(View.VISIBLE);
-        logoutButton.setVisibility(View.VISIBLE);
+        // Geblokkeerd scherm (losse TextView)
+        locked.setVisibility(
+                s == Screen.LOCKED ? View.VISIBLE : View.GONE
+        );
     }
 }

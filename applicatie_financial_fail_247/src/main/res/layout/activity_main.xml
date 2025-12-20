@@ -32,7 +32,7 @@
         app:layout_constraintEnd_toEndOf="parent"
         android:layout_marginHorizontal="32dp" />
 
-    <!-- Knop om in te loggen -->
+    <!-- Inlogknop -->
     <Button
         android:id="@+id/loginButton"
         android:layout_width="wrap_content"
@@ -43,7 +43,7 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent" />
 
-    <!-- Tekstveld voor foutmeldingen of korte feedback -->
+    <!-- Feedbacktekst (foutmeldingen) -->
     <TextView
         android:id="@+id/resultText"
         android:layout_width="wrap_content"
@@ -55,7 +55,7 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent" />
 
-    <!-- Welkom scherm na succesvol inloggen (wordt in code zichtbaar gemaakt) -->
+    <!-- Welkomscherm (zichtbaar na succesvol inloggen) -->
     <TextView
         android:id="@+id/welcomeMessage"
         android:layout_width="wrap_content"
@@ -68,7 +68,7 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent" />
 
-    <!-- Uitlog knop op het welkom scherm -->
+    <!-- Uitlogknop -->
     <Button
         android:id="@+id/logoutButton"
         android:layout_width="wrap_content"
@@ -78,6 +78,20 @@
         app:layout_constraintTop_toBottomOf="@id/welcomeMessage"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        android:layout_marginTop="20dp"/>
+        android:layout_marginTop="20dp" />
+
+    <!-- GROEP login scherm -->
+    <androidx.constraintlayout.widget.Group
+        android:id="@+id/loginGroup"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        app:constraint_referenced_ids="username,password,loginButton,resultText" />
+
+    <!-- GROEP welkom scherm -->
+    <androidx.constraintlayout.widget.Group
+        android:id="@+id/welcomeGroup"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        app:constraint_referenced_ids="welcomeMessage,logoutButton" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

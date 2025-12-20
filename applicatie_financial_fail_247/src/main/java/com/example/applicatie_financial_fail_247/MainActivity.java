@@ -2,81 +2,60 @@ package com.example.applicatie_financial_fail_247;
 
 import android.os.Bundle;
 import android.view.View;
-import android.widget.Button;
-import android.widget.EditText;
-import android.widget.TextView;
-
+import android.widget.*;
 import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.constraintlayout.widget.Group;
 
 public class MainActivity extends AppCompatActivity {
 
-    // UI elementen
-    EditText usernameField, passwordField;
-    TextView resultText, welcomeMessage;
-    Button loginButton, logoutButton;
+    EditText username, password;
+    TextView result, welcome;
+    Button login, logout;
+
+    Group loginGroup, welcomeGroup;
 
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
+    protected void onCreate(Bundle b) {
+        super.onCreate(b);
         EdgeToEdge.enable(this);
         setContentView(R.layout.activity_main);
 
-        // Koppelen van UI elementen aan de code
-        usernameField = findViewById(R.id.username);
-        passwordField = findViewById(R.id.password);
-        resultText = findViewById(R.id.resultText);
-        welcomeMessage = findViewById(R.id.welcomeMessage);
-        loginButton = findViewById(R.id.loginButton);
-        logoutButton = findViewById(R.id.logoutButton);
+        // UI koppelen
+        username = findViewById(R.id.username);
+        password = findViewById(R.id.password);
+        result   = findViewById(R.id.resultText);
+        welcome  = findViewById(R.id.welcomeMessage);
+        login    = findViewById(R.id.loginButton);
+        logout   = findViewById(R.id.logoutButton);
+        loginGroup   = findViewById(R.id.loginGroup);
+        welcomeGroup = findViewById(R.id.welcomeGroup);
 
-        // Login knop wordt ingedrukt
-        loginButton.setOnClickListener(v -> {
-            String user = usernameField.getText().toString();
-            String pass = passwordField.getText().toString();
+        login.setOnClickListener(v -> {
+            String u = username.getText().toString();
+            String p = password.getText().toString();
 
-            // GEEN lockout mechanisme
-            // Er is geen teller, geen max pogingen, geen blokkering.
-            // Je kunt blijven proberen zonder limiet > APPINSPECTOR FAIL.
-
-            if (user.equals("admin") && pass.equals("1234")) {
-                // Bij juiste login > welkomscherm tonen
-                showWelcomeScreen(user);
+            // GEEN lockout onbeperkt proberen toegestaan
+            if (u.equals("admin") && p.equals("1234")) {
+                welcome.setText("Welkom " + u + "!");
+                show(Screen.WELCOME);
             } else {
-                // Algemene foutmelding > realistisch
-                resultText.setText("Onjuiste inloggegevens.");
+                result.setText("Onjuiste inloggegevens.");
             }
         });
 
-        // Uitlog knop: keert terug naar login-scherm
-        logoutButton.setOnClickListener(v -> {
-            // Loginvelden weer zichtbaar maken
-            usernameField.setVisibility(View.VISIBLE);
-            passwordField.setVisibility(View.VISIBLE);
-            loginButton.setVisibility(View.VISIBLE);
-            resultText.setVisibility(View.VISIBLE);
-
-            // Welkomscherm verbergen
-            welcomeMessage.setVisibility(View.GONE);
-            logoutButton.setVisibility(View.GONE);
-
-            resultText.setText(""); // Oude tekst weghalen
+        logout.setOnClickListener(v -> {
+            result.setText("");
+            show(Screen.LOGIN);
         });
+
+        show(Screen.LOGIN);
     }
 
-    // Toont het welkomscherm
-    private void showWelcomeScreen(String username) {
-        // Loginvelden verbergen
-        usernameField.setVisibility(View.GONE);
-        passwordField.setVisibility(View.GONE);
-        loginButton.setVisibility(View.GONE);
-        resultText.setVisibility(View.GONE);
+    enum Screen { LOGIN, WELCOME }
 
-        // Dynamische welkomsttekst
-        welcomeMessage.setText("Welkom " + username + "!");
-
-        // Welkomscherm tonen
-        welcomeMessage.setVisibility(View.VISIBLE);
-        logoutButton.setVisibility(View.VISIBLE);
+    private void show(Screen s) {
+        loginGroup.setVisibility(s == Screen.LOGIN ? View.VISIBLE : View.GONE);
+        welcomeGroup.setVisibility(s == Screen.WELCOME ? View.VISIBLE : View.GONE);
     }
 }
